@@ -12,15 +12,15 @@ public class PlayerAnimate : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-		this.body = GetComponent<Rigidbody2D>();
+        body = GetComponent<Rigidbody2D>();
 	}
 	
 	// Update is called once per frame
 	void Update ()
 	{
-		this.animator.SetFloat("xSpeed", Mathf.Abs(this.body.velocity.x));
+        animator.SetFloat("xSpeed", Mathf.Abs(body.velocity.x));
 
-        this.animator.SetFloat("ySpeed", this.body.velocity.y);
+        animator.SetFloat("ySpeed", body.velocity.y);
 
     }
 }
