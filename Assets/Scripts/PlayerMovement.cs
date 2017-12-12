@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour {
     public int playerTurboSpeed = 20;
     public int playerJumpPower = 1250;
     public int shortJumpStrength = 10;
+    public int maxFallSpeed = -20;
     public float wallFriction = 1.5f;
 
     private Rigidbody2D beetBoi;
@@ -38,22 +39,23 @@ public class PlayerMovement : MonoBehaviour {
     {
         //Controls
         moveX = Input.GetAxis("Horizontal");
+
         if (Input.GetButton("Turbo") || Input.GetAxis("Triggers") == 1 || Input.GetAxis("Triggers") == -1)
         {
-            beetBoi.velocity = new Vector2(moveX * playerTurboSpeed, beetBoi.velocity.y);
+            beetBoi.velocity = new Vector2(moveX * playerTurboSpeed, Mathf.Clamp(beetBoi.velocity.y, maxFallSpeed, Mathf.Infinity));
         }
         else
         {
-            beetBoi.velocity = new Vector2(moveX * playerSpeed, beetBoi.velocity.y);
+            if (wallSliding)
+            {
+                beetBoi.velocity = new Vector2(moveX * playerSpeed > 5f || moveX * playerSpeed < -5f ? moveX * playerSpeed : 0f, Mathf.Clamp(beetBoi.velocity.y, -5f, 30f));
+            }
+            else
+            {
+                beetBoi.velocity = new Vector2(moveX * playerSpeed, Mathf.Clamp(beetBoi.velocity.y, maxFallSpeed, Mathf.Infinity));
+            }
         }
 
-        //y velocity when sliding on walls
-        if (wallSliding)
-        {
-            beetBoi.velocity = new Vector2(0, Mathf.Clamp(beetBoi.velocity.y, -5f, 25f));
-        }
-
-        //jump
         if (Input.GetButtonDown("Jump"))
         {
             Jump();
@@ -81,7 +83,13 @@ public class PlayerMovement : MonoBehaviour {
     {
         if (beetBoi.velocity.y == 0)
         {
-            beetBoi.AddForce(Vector2.up * playerJumpPower);
+            beetBoi.AddForce(wallSliding ? Vector2.up * playerJumpPower * 1.5f : Vector2.up * playerJumpPower);
+        }
+        else if (beetBoi.velocity.y != 0 && wallSliding)
+        {
+            Debug.Log("WALLJUMP");
+            wallSliding = false;
+            beetBoi.AddForce(new Vector2(-2000, 2000));
         }
 
 
@@ -97,19 +105,15 @@ public class PlayerMovement : MonoBehaviour {
 
     void OnCollisionEnter2D (Collision2D collision)
     {
-        if (collision.collider.tag == "Floor" && beetBoi.velocity.y != 0)
+        if (collision.collider.tag == "Floor")
         {
             ContactPoint2D contact = collision.contacts[0];
 
             if (contact.normal == new Vector2(1, 0) || contact.normal == new Vector2(-1, 0))
             {
-                //beetBoi.velocity = new Vector2(0, Mathf.Clamp(beetBoi.velocity.y * wallFriction, -5f, 15f));
+                Debug.Log("SLIDING");
                 wallSliding = true;
             }
-        }
-        else if (collision.collider.tag == "Floor" && beetBoi.velocity.y == 0)
-        {
-            wallSliding = false;
         }
 
 
