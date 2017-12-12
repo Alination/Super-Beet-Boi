@@ -15,6 +15,14 @@ public class PlayerMovement : MonoBehaviour {
     private bool facingRight = true;
     private bool wallSliding = false;
 
+    public bool IsSliding
+    {
+        get
+        {
+            return this.wallSliding;
+        }
+    }
+
 
     // Use this for initialization
     void Start () {
@@ -87,7 +95,7 @@ public class PlayerMovement : MonoBehaviour {
         transform.localScale = scale;
     }
 
-    void OnCollisionStay2D (Collision2D collision)
+    void OnCollisionEnter2D (Collision2D collision)
     {
         if (collision.collider.tag == "Floor" && beetBoi.velocity.y != 0)
         {
