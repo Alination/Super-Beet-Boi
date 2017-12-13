@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviour {
 
@@ -16,6 +17,7 @@ public class PlayerMovement : MonoBehaviour {
     private bool facingRight = true;
     private bool wallSliding = false;
 
+    public float wallNormal = -1f;
     public bool IsSliding
     {
         get
@@ -42,13 +44,13 @@ public class PlayerMovement : MonoBehaviour {
 
         if (Input.GetButton("Turbo") || Input.GetAxis("Triggers") == 1 || Input.GetAxis("Triggers") == -1)
         {
-            beetBoi.velocity = new Vector2(moveX * playerTurboSpeed, Mathf.Clamp(beetBoi.velocity.y, maxFallSpeed, Mathf.Infinity));
+            beetBoi.velocity = new Vector2(moveX * playerTurboSpeed, wallSliding ? Mathf.Clamp(beetBoi.velocity.y, maxFallSpeed, Mathf.Infinity) : Mathf.Clamp(beetBoi.velocity.y, maxFallSpeed, Mathf.Infinity));
         }
-        else
+        else if (moveX < 0 || moveX > 0)
         {
             if (wallSliding)
             {
-                beetBoi.velocity = new Vector2(moveX * playerSpeed > 5f || moveX * playerSpeed < -5f ? moveX * playerSpeed : 0f, Mathf.Clamp(beetBoi.velocity.y, -5f, 30f));
+                beetBoi.velocity = new Vector2(moveX * playerSpeed > 5f || moveX * playerSpeed < -5f ? moveX * playerSpeed : 0f, Mathf.Clamp(beetBoi.velocity.y, -15f, 30f));
             }
             else
             {
@@ -76,6 +78,12 @@ public class PlayerMovement : MonoBehaviour {
         {
             FlipPlayer();
         }
+
+        //Did it fall to its death?
+        if (beetBoi.transform.position.y < -11)
+        {
+            StartCoroutine("Died");
+        }
         
     }
 
@@ -87,9 +95,8 @@ public class PlayerMovement : MonoBehaviour {
         }
         else if (beetBoi.velocity.y != 0 && wallSliding)
         {
-            Debug.Log("WALLJUMP");
+            beetBoi.AddForce(new Vector2(3000f * wallNormal, 2000f));
             wallSliding = false;
-            beetBoi.AddForce(new Vector2(-2000, 2000));
         }
 
 
@@ -105,14 +112,14 @@ public class PlayerMovement : MonoBehaviour {
 
     void OnCollisionEnter2D (Collision2D collision)
     {
-        if (collision.collider.tag == "Floor")
+        if (collision.collider.CompareTag("Floor"))
         {
             ContactPoint2D contact = collision.contacts[0];
 
-            if (contact.normal == new Vector2(1, 0) || contact.normal == new Vector2(-1, 0))
+            if (contact.normal.x == 1 || contact.normal.x == -1)
             {
-                Debug.Log("SLIDING");
                 wallSliding = true;
+                wallNormal = contact.normal.x;
             }
         }
 
@@ -123,10 +130,25 @@ public class PlayerMovement : MonoBehaviour {
 
     private void OnCollisionExit2D (Collision2D collision)
     {
-        if (collision.collider.tag == "Floor")
+        if (collision.collider.CompareTag("Floor"))
         {
             wallSliding = false;
         }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Sawblade"))
+        {
+            StartCoroutine("Died");
+        }
+    }
+
+    IEnumerator Died()
+    {
+        beetBoi.constraints = RigidbodyConstraints2D.FreezeAll;
+        yield return new WaitForSeconds(1);
+        SceneManager.LoadScene("Level 1");
     }
 
 }

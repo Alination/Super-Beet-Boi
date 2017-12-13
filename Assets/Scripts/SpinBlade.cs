@@ -19,7 +19,7 @@ public class SpinBlade : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
 		this.renderer.transform.RotateAround (this.renderer.transform.position, new Vector3 (0, 0, 1), this.rotationsPerSecond * 1000 * UnityEngine.Time.deltaTime);
 	}
 }
