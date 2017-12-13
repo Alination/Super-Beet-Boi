@@ -505,7 +505,7 @@ Transform:
   m_Children:
   - {fileID: 1267159194}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1717663236
 MonoBehaviour:
@@ -522,6 +522,7 @@ MonoBehaviour:
   playerTurboSpeed: 15
   playerJumpPower: 1500
   shortJumpStrength: 50
+  maxFallSpeed: -20
   wallFriction: 2
 --- !u!95 &1717663237
 Animator:
@@ -589,7 +590,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4984184793773610, guid: 1faaa14bf2ccbb34583d05da707487e6, type: 2}
       propertyPath: m_RootOrder
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1990158278604134, guid: 1faaa14bf2ccbb34583d05da707487e6, type: 2}
       propertyPath: m_Name
