@@ -115,9 +115,11 @@ public class PlayerMovement : MonoBehaviour {
         if (collision.collider.CompareTag("Floor"))
         {
             ContactPoint2D contact = collision.contacts[0];
+            Debug.Log("COLIIIDE: " + contact.normal.x);
 
-            if (contact.normal.x == 1 || contact.normal.x == -1)
+            if (contact.normal.x > 0.9f || contact.normal.x < -0.9f)
             {
+                Debug.Log("SLIIIDE");
                 wallSliding = true;
                 wallNormal = contact.normal.x;
             }
@@ -142,13 +144,25 @@ public class PlayerMovement : MonoBehaviour {
         {
             StartCoroutine("Died");
         }
+        else if (collision.CompareTag("Girl"))
+        {
+            StartCoroutine("Win");
+        }
     }
 
     IEnumerator Died()
     {
+        Debug.Log(wallSliding);
         beetBoi.constraints = RigidbodyConstraints2D.FreezeAll;
         yield return new WaitForSeconds(1);
         SceneManager.LoadScene("Level 1");
+    }
+
+    IEnumerator Win()
+    {
+        beetBoi.constraints = RigidbodyConstraints2D.FreezeAll;
+        yield return new WaitForSeconds(1);
+        SceneManager.LoadScene("Main Menu");
     }
 
 }
