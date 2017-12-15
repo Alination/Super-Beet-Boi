@@ -163,7 +163,6 @@ public class PlayerMovement : MonoBehaviour {
     IEnumerator Died()
     {
         deathSource.Play();
-        Debug.Log(wallSliding);
         beetBoi.constraints = RigidbodyConstraints2D.FreezeAll;
         yield return new WaitForSeconds(0.5f);
         SceneManager.LoadScene("Level 1");
@@ -172,7 +171,9 @@ public class PlayerMovement : MonoBehaviour {
     IEnumerator Win()
     {
         beetBoi.constraints = RigidbodyConstraints2D.FreezeAll;
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.3f);
+        gameObject.SetActive(false);
+        yield return new WaitForSeconds(2);
         SceneManager.LoadScene("Main Menu");
     }
 

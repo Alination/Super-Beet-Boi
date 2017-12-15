@@ -88,7 +88,6 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaDirect: 0.5
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
-    m_ShowResolutionOverlay: 1
   m_LightingDataAsset: {fileID: 0}
   m_UseShadowmask: 1
 --- !u!196 &4
@@ -897,7 +896,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4297530844231220, guid: 03b87af934cd5614ab0bfeebbfbfe7c2, type: 2}
       propertyPath: m_LocalPosition.x
-      value: -10.408
+      value: -10.06
       objectReference: {fileID: 0}
     - target: {fileID: 4297530844231220, guid: 03b87af934cd5614ab0bfeebbfbfe7c2, type: 2}
       propertyPath: m_LocalPosition.y
@@ -934,7 +933,7 @@ Prefab:
     - target: {fileID: 212196677990934516, guid: 03b87af934cd5614ab0bfeebbfbfe7c2,
         type: 2}
       propertyPath: m_Size.x
-      value: 23.751902
+      value: 23.05636
       objectReference: {fileID: 0}
     - target: {fileID: 212196677990934516, guid: 03b87af934cd5614ab0bfeebbfbfe7c2,
         type: 2}
@@ -1121,6 +1120,7 @@ GameObject:
   - component: {fileID: 1625860062}
   - component: {fileID: 1625860061}
   - component: {fileID: 1625860060}
+  - component: {fileID: 1625860064}
   - component: {fileID: 1625860063}
   m_Layer: 0
   m_Name: Bondage Girl
@@ -1197,7 +1197,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1625860059}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 23.81, y: 10.12, z: 0}
+  m_LocalPosition: {x: 32.57, y: -6.44, z: 0}
   m_LocalScale: {x: -1, y: 1, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
@@ -1228,6 +1228,18 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 2.1333334, y: 2.1333334}
   m_EdgeRadius: 0
+--- !u!114 &1625860064
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1625860059}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc473da81f4a62947a16ce17166467d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 1625860060}
 --- !u!1001 &1634290539
 Prefab:
   m_ObjectHideFlags: 0
