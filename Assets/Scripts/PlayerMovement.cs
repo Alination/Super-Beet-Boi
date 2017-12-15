@@ -17,6 +17,12 @@ public class PlayerMovement : MonoBehaviour {
     private bool facingRight = true;
     private bool wallSliding = false;
 
+    public AudioClip jumpClip;
+    public AudioClip deathClip;
+
+    private AudioSource jumpSource;
+    private AudioSource deathSource;
+
     public float wallNormal = -1f;
     public bool IsSliding
     {
@@ -30,7 +36,15 @@ public class PlayerMovement : MonoBehaviour {
     // Use this for initialization
     void Start () {
         beetBoi = gameObject.GetComponent<Rigidbody2D>();
-	}
+
+        jumpSource = gameObject.AddComponent<AudioSource>();
+        jumpSource.clip = jumpClip;
+        jumpSource.playOnAwake = false;
+
+        deathSource = gameObject.AddComponent<AudioSource>();
+        deathSource.clip = deathClip;
+        deathSource.playOnAwake = false;
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -89,6 +103,7 @@ public class PlayerMovement : MonoBehaviour {
 
     void Jump()
     {
+        jumpSource.Play();
         if (beetBoi.velocity.y == 0)
         {
             beetBoi.AddForce(wallSliding ? Vector2.up * playerJumpPower * 1.5f : Vector2.up * playerJumpPower);
@@ -98,7 +113,6 @@ public class PlayerMovement : MonoBehaviour {
             beetBoi.AddForce(new Vector2(3000f * wallNormal, 2000f));
             wallSliding = false;
         }
-
 
     }
 
@@ -124,10 +138,6 @@ public class PlayerMovement : MonoBehaviour {
                 wallNormal = contact.normal.x;
             }
         }
-
-
-
-
     }
 
     private void OnCollisionExit2D (Collision2D collision)
@@ -152,9 +162,10 @@ public class PlayerMovement : MonoBehaviour {
 
     IEnumerator Died()
     {
+        deathSource.Play();
         Debug.Log(wallSliding);
         beetBoi.constraints = RigidbodyConstraints2D.FreezeAll;
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.5f);
         SceneManager.LoadScene("Level 1");
     }
 
