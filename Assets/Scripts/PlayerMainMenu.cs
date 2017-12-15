@@ -46,7 +46,7 @@ public class PlayerMainMenu : MonoBehaviour
 
     IEnumerator startGame()
     {
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.8f);
         SceneManager.LoadScene("Level 1");
     }
 

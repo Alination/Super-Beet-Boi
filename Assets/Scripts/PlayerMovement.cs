@@ -11,6 +11,9 @@ public class PlayerMovement : MonoBehaviour {
     public int shortJumpStrength = 10;
     public int maxFallSpeed = -20;
     public float wallFriction = 1.5f;
+    public Canvas text;
+
+    SpriteRenderer rend;
 
     private Rigidbody2D beetBoi;
     private float moveX;
@@ -36,6 +39,9 @@ public class PlayerMovement : MonoBehaviour {
     // Use this for initialization
     void Start () {
         beetBoi = gameObject.GetComponent<Rigidbody2D>();
+        rend = gameObject.GetComponent<SpriteRenderer>();
+
+        text.enabled = false;
 
         jumpSource = gameObject.AddComponent<AudioSource>();
         jumpSource.clip = jumpClip;
@@ -171,8 +177,9 @@ public class PlayerMovement : MonoBehaviour {
     IEnumerator Win()
     {
         beetBoi.constraints = RigidbodyConstraints2D.FreezeAll;
+        text.enabled = true;
         yield return new WaitForSeconds(0.3f);
-        gameObject.SetActive(false);
+        rend.enabled = false;
         yield return new WaitForSeconds(2);
         SceneManager.LoadScene("Main Menu");
     }
