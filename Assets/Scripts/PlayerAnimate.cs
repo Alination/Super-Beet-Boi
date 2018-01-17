@@ -24,7 +24,7 @@ public class PlayerAnimate : MonoBehaviour
 
         animator.SetFloat("ySpeed", body.velocity.y);
 
-        animator.SetBool("isSliding", movement.IsSliding);
+        //animator.SetBool("isSliding", movement.IsSliding);
 
     }
 }

@@ -5,183 +5,116 @@ using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviour {
 
-    public int playerSpeed = 10;
-    public int playerTurboSpeed = 20;
-    public int playerJumpPower = 1250;
-    public int shortJumpStrength = 10;
-    public int maxFallSpeed = -20;
-    public float wallFriction = 1.5f;
-    public Canvas text;
+    public class GroundState
+    {
+        private GameObject player;
+        private float width;
+        private float height;
+        private float length;
 
-    SpriteRenderer rend;
+
+        //GroundState constructor.  Sets offsets for raycasting.
+        public GroundState(GameObject playerRef)
+        {
+            player = playerRef;
+            width = player.GetComponent<Collider2D>().bounds.extents.x + 0.1f;
+            height = player.GetComponent<Collider2D>().bounds.extents.y + 0.2f;
+            length = 0.05f;
+        }
+
+        //Returns whether or not player is touching wall.
+        public bool isWall()
+        {
+            bool left = Physics2D.Raycast(new Vector2(player.transform.position.x - width, player.transform.position.y), -Vector2.right, length);
+            bool right = Physics2D.Raycast(new Vector2(player.transform.position.x + width, player.transform.position.y), Vector2.right, length);
+
+            if (left || right)
+                return true;
+            else
+                return false;
+        }
+
+        //Returns whether or not player is touching ground.
+        public bool isGround()
+        {
+            bool bottom1 = Physics2D.Raycast(new Vector2(player.transform.position.x, player.transform.position.y - height), -Vector2.up, length);
+            bool bottom2 = Physics2D.Raycast(new Vector2(player.transform.position.x + (width - 0.2f), player.transform.position.y - height), -Vector2.up, length);
+            bool bottom3 = Physics2D.Raycast(new Vector2(player.transform.position.x - (width - 0.2f), player.transform.position.y - height), -Vector2.up, length);
+            if (bottom1 || bottom2 || bottom3)
+                return true;
+            else
+                return false;
+        }
+
+        //Returns whether or not player is touching wall or ground.
+        public bool isTouching()
+        {
+            if (isGround() || isWall())
+                return true;
+            else
+                return false;
+        }
+
+        //Returns direction of wall.
+        public int wallDirection()
+        {
+            bool left = Physics2D.Raycast(new Vector2(player.transform.position.x - width, player.transform.position.y), -Vector2.right, length);
+            bool right = Physics2D.Raycast(new Vector2(player.transform.position.x + width, player.transform.position.y), Vector2.right, length);
+
+            if (left)
+                return -1;
+            else if (right)
+                return 1;
+            else
+                return 0;
+        }
+    }
+
+    //Feel free to tweak these values in the inspector to perfection.  I prefer them private.
+    public float speed = 14f;
+    public float accel = 6f;
+    public float airAccel = 3f;
+    public float jump = 14f;  //I could use the "speed" variable, but this is only coincidental in my case.  Replace line 89 if you think otherwise.
 
     private Rigidbody2D beetBoi;
-    private float moveX;
-    private bool facingRight = true;
-    private bool wallSliding = false;
 
-    public AudioClip jumpClip;
-    public AudioClip deathClip;
+    private GroundState groundState;
 
-    private AudioSource jumpSource;
-    private AudioSource deathSource;
-
-    public float wallNormal = -1f;
-    public bool IsSliding
+    void Start()
     {
-        get
-        {
-            return this.wallSliding;
-        }
-    }
-
-
-    // Use this for initialization
-    void Start () {
         beetBoi = gameObject.GetComponent<Rigidbody2D>();
-        rend = gameObject.GetComponent<SpriteRenderer>();
-
-        text.enabled = false;
-
-        jumpSource = gameObject.AddComponent<AudioSource>();
-        jumpSource.clip = jumpClip;
-        jumpSource.playOnAwake = false;
-
-        deathSource = gameObject.AddComponent<AudioSource>();
-        deathSource.clip = deathClip;
-        deathSource.playOnAwake = false;
-    }
-	
-	// Update is called once per frame
-	void Update () {
-        PlayerMove();
+        //Create an object to check if player is grounded or touching wall
+        groundState = new GroundState(transform.gameObject);
     }
 
-    void PlayerMove()
+    private Vector2 input;
+
+    void Update()
     {
-        //Controls
-        moveX = Input.GetAxis("Horizontal");
+        //Handle input
+        if (Input.GetKey(KeyCode.LeftArrow))
+            input.x = -1;
+        else if (Input.GetKey(KeyCode.RightArrow))
+            input.x = 1;
+        else
+            input.x = 0;
 
-        if (Input.GetButton("Turbo") || Input.GetAxis("Triggers") == 1 || Input.GetAxis("Triggers") == -1)
-        {
-            beetBoi.velocity = new Vector2(moveX * playerTurboSpeed, wallSliding ? Mathf.Clamp(beetBoi.velocity.y, maxFallSpeed, Mathf.Infinity) : Mathf.Clamp(beetBoi.velocity.y, maxFallSpeed, Mathf.Infinity));
-        }
-        else if (moveX < 0 || moveX > 0)
-        {
-            if (wallSliding)
-            {
-                beetBoi.velocity = new Vector2(moveX * playerSpeed > 5f || moveX * playerSpeed < -5f ? moveX * playerSpeed : 0f, Mathf.Clamp(beetBoi.velocity.y, -15f, 30f));
-            }
-            else
-            {
-                beetBoi.velocity = new Vector2(moveX * playerSpeed, Mathf.Clamp(beetBoi.velocity.y, maxFallSpeed, Mathf.Infinity));
-            }
-        }
+        if (Input.GetKeyDown(KeyCode.Space))
+            input.y = 1;
 
-        if (Input.GetButtonDown("Jump"))
-        {
-            Jump();
-        }
-
-        //Beet Boi jumps lower if the button is pressed shortly
-        if (beetBoi.velocity.y > 0 && !Input.GetButton("Jump"))
-        {
-            beetBoi.velocity += Vector2.up * Physics2D.gravity.y * shortJumpStrength * Time.deltaTime;
-        }
-
-        //Player Direction
-        if (moveX < 0.0f && facingRight == true)
-        {
-            FlipPlayer();
-        }
-        else if (moveX > 0.0f && facingRight == false)
-        {
-            FlipPlayer();
-        }
-
-        //Did it fall to its death?
-        if (beetBoi.transform.position.y < -11)
-        {
-            StartCoroutine("Died");
-        }
-        
+        //Reverse player if going different direction
+        transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, (input.x == 0) ? transform.localEulerAngles.y : (input.x + 1) * 90, transform.localEulerAngles.z);
     }
 
-    void Jump()
+    void FixedUpdate()
     {
-        jumpSource.Play();
-        if (beetBoi.velocity.y == 0)
-        {
-            beetBoi.AddForce(wallSliding ? Vector2.up * playerJumpPower * 1.5f : Vector2.up * playerJumpPower);
-        }
-        else if (beetBoi.velocity.y != 0 && wallSliding)
-        {
-            beetBoi.AddForce(new Vector2(3000f * wallNormal, 2000f));
-            wallSliding = false;
-        }
+        beetBoi.AddForce(new Vector2(((input.x * speed) - beetBoi.velocity.x) * (groundState.isGround() ? accel : airAccel), 0)); //Move player.
+        beetBoi.velocity = new Vector2((input.x == 0 && groundState.isGround()) ? 0 : beetBoi.velocity.x, (input.y == 1 && groundState.isTouching()) ? jump : beetBoi.velocity.y); //Stop player if input.x is 0 (and grounded) and jump if input.y is 1
 
-    }
+        if (groundState.isWall() && !groundState.isGround() && input.y == 1)
+            beetBoi.velocity = new Vector2(-groundState.wallDirection() * speed * 0.75f, beetBoi.velocity.y); //Add force negative to wall direction (with speed reduction)
 
-    void FlipPlayer()
-    {
-        facingRight = !facingRight;
-        Vector2 scale = gameObject.transform.localScale;
-        scale.x *= -1;
-        transform.localScale = scale;
-    }
-
-    void OnCollisionEnter2D (Collision2D collision)
-    {
-        if (collision.collider.CompareTag("Floor"))
-        {
-            ContactPoint2D contact = collision.contacts[0];
-            Debug.Log("COLIIIDE: " + contact.normal.x);
-
-            if (contact.normal.x > 0.9f || contact.normal.x < -0.9f)
-            {
-                Debug.Log("SLIIIDE");
-                wallSliding = true;
-                wallNormal = contact.normal.x;
-            }
-        }
-    }
-
-    private void OnCollisionExit2D (Collision2D collision)
-    {
-        if (collision.collider.CompareTag("Floor"))
-        {
-            wallSliding = false;
-        }
-    }
-
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.CompareTag("Sawblade"))
-        {
-            StartCoroutine("Died");
-        }
-        else if (collision.CompareTag("Girl"))
-        {
-            StartCoroutine("Win");
-        }
-    }
-
-    IEnumerator Died()
-    {
-        deathSource.Play();
-        beetBoi.constraints = RigidbodyConstraints2D.FreezeAll;
-        yield return new WaitForSeconds(0.5f);
-        SceneManager.LoadScene("Level 1");
-    }
-
-    IEnumerator Win()
-    {
-        beetBoi.constraints = RigidbodyConstraints2D.FreezeAll;
-        text.enabled = true;
-        yield return new WaitForSeconds(0.3f);
-        rend.enabled = false;
-        yield return new WaitForSeconds(2);
-        SceneManager.LoadScene("Main Menu");
+        input.y = 0;
     }
 
 }
