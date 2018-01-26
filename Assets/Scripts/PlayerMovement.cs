@@ -33,7 +33,7 @@ public class PlayerMovement : MonoBehaviour {
             else
                 return false;
         }
-
+        
         //Returns whether or not player is touching ground.
         public bool isGround()
         {
@@ -41,9 +41,13 @@ public class PlayerMovement : MonoBehaviour {
             bool bottom2 = Physics2D.Raycast(new Vector2(player.transform.position.x + (width - 0.2f), player.transform.position.y - height), -Vector2.up, length);
             bool bottom3 = Physics2D.Raycast(new Vector2(player.transform.position.x - (width - 0.2f), player.transform.position.y - height), -Vector2.up, length);
             if (bottom1 || bottom2 || bottom3)
+            {
                 return true;
+            }
             else
+            {
                 return false;
+            }
         }
 
         //Returns whether or not player is touching wall or ground.
@@ -78,6 +82,8 @@ public class PlayerMovement : MonoBehaviour {
 
     private Rigidbody2D beetBoi;
 
+    private bool facingRight;
+
     private GroundState groundState;
 
     void Start()
@@ -92,18 +98,24 @@ public class PlayerMovement : MonoBehaviour {
     void Update()
     {
         //Handle input
-        if (Input.GetKey(KeyCode.LeftArrow))
-            input.x = -1;
-        else if (Input.GetKey(KeyCode.RightArrow))
-            input.x = 1;
+        if (Input.GetAxis("Horizontal") != 0)
+            input.x = Input.GetAxis("Horizontal");
         else
             input.x = 0;
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetButtonDown("Jump"))
             input.y = 1;
 
         //Reverse player if going different direction
-        transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, (input.x == 0) ? transform.localEulerAngles.y : (input.x + 1) * 90, transform.localEulerAngles.z);
+        if (input.x < 0.0f && facingRight == true)
+        {
+            FlipPlayer();
+        }
+        else if (input.x > 0.0f && facingRight == false)
+        {
+            FlipPlayer();
+        }
+
     }
 
     void FixedUpdate()
@@ -115,6 +127,16 @@ public class PlayerMovement : MonoBehaviour {
             beetBoi.velocity = new Vector2(-groundState.wallDirection() * speed * 0.75f, beetBoi.velocity.y); //Add force negative to wall direction (with speed reduction)
 
         input.y = 0;
+
+        Debug.DrawLine(beetBoi.transform.position, beetBoi.GetComponent<Collider2D>().bounds.min, Color.red);
+    }
+
+    void FlipPlayer()
+    {
+        facingRight = !facingRight;
+        Vector2 scale = gameObject.transform.localScale;
+        scale.x *= -1;
+        transform.localScale = scale;
     }
 
 }
